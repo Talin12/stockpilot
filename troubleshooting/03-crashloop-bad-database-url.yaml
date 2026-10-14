@@ -1,0 +1,30 @@
+# Scenario 3 - CrashLoopBackOff: the real backend image, pointed at a database host that
+# does not exist. The prestart step retries for ~60s, gives up and exits 1.
+#   kubectl apply -f troubleshooting/03-crashloop-bad-database-url.yaml
+# Uses the image already running in the cluster; on EKS change the image to your GHCR tag.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab-crashloop
+  namespace: stockpilot
+  labels: { lab: troubleshooting }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: lab-crashloop }
+  template:
+    metadata:
+      labels: { app: lab-crashloop, lab: troubleshooting }
+    spec:
+      securityContext: { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: backend
+          image: stockpilot-backend:local
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DATABASE_URL
+              value: postgresql+psycopg://stockpilot:wrong@postgres-does-not-exist:5432/stockpilot
+          securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: ["ALL"] } }
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 200m, memory: 256Mi }

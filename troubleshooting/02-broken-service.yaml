@@ -1,0 +1,16 @@
+# Scenario 2 - Service with no endpoints: its selector matches no Pod labels,
+# and its targetPort is wrong as well. Traffic to it fails although every Pod is healthy.
+#   kubectl apply -f troubleshooting/02-broken-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: lab-broken-service
+  namespace: stockpilot
+  labels: { lab: troubleshooting }
+spec:
+  selector:
+    app.kubernetes.io/name: stockpilot-api # real label is stockpilot-backend
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8080 # backend listens on 8000

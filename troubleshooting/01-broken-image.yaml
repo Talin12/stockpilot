@@ -1,0 +1,21 @@
+# Scenario 1 - ImagePullBackOff: the tag does not exist in the registry.
+#   kubectl apply -f troubleshooting/01-broken-image.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab-broken-image
+  namespace: stockpilot
+  labels: { lab: troubleshooting }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: lab-broken-image }
+  template:
+    metadata:
+      labels: { app: lab-broken-image, lab: troubleshooting }
+    spec:
+      securityContext: { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: backend
+          image: ghcr.io/talin12/stockpilot-backend:this-tag-does-not-exist
+          securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: ["ALL"] } }

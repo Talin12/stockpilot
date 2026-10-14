@@ -1,0 +1,24 @@
+# Scenario 4 - Pending: the Pod requests more CPU/memory than any node can offer,
+# so the scheduler cannot place it anywhere.
+#   kubectl apply -f troubleshooting/04-pending-unschedulable.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab-pending
+  namespace: stockpilot
+  labels: { lab: troubleshooting }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: lab-pending }
+  template:
+    metadata:
+      labels: { app: lab-pending, lab: troubleshooting }
+    spec:
+      securityContext: { runAsNonRoot: true, runAsUser: 101, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: web
+          image: nginxinc/nginx-unprivileged:1.29-alpine
+          resources:
+            requests: { cpu: "64", memory: 256Gi }
+          securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: ["ALL"] } }
