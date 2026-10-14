@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+tests/
+.coverage
+coverage.xml
+*.db
+.env
+requirements-dev.txt
+pytest.ini
