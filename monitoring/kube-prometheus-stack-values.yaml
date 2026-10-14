@@ -1,0 +1,60 @@
+# Values for prometheus-community/kube-prometheus-stack (Prometheus Operator + Prometheus + Grafana)
+#
+#   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#   helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+#     -n monitoring --create-namespace -f monitoring/kube-prometheus-stack-values.yaml
+#
+# The StockPilot chart ships a ServiceMonitor, PrometheusRule and a Grafana dashboard ConfigMap;
+# these settings make the stack discover them in any namespace.
+
+prometheus:
+  prometheusSpec:
+    # Pick up ServiceMonitors/PodMonitors/rules from every namespace, not only this release's.
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    ruleSelector: {}
+    ruleNamespaceSelector: {}
+    retention: 3d
+    scrapeInterval: 15s
+    resources:
+      requests: { cpu: 100m, memory: 400Mi }
+      limits: { memory: 1Gi }
+
+grafana:
+  enabled: true
+  # Admin password: auto-generated into Secret kube-prometheus-stack-grafana (see docs/RUNBOOK.md).
+  defaultDashboardsTimezone: browser
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+
+# Alertmanager is not needed for the demo: firing alerts are visible on Prometheus' Alerts page.
+alertmanager:
+  enabled: false
+
+# Control-plane components are not scrapeable on managed EKS or minikube; disabling them
+# keeps the Prometheus Targets page free of permanently-DOWN entries.
+kubeEtcd:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+
+# kube-state-metrics (HPA/Deployment state) and node-exporter (node CPU/memory) stay enabled.
+kube-state-metrics:
+  resources:
+    requests: { cpu: 10m, memory: 32Mi }
+prometheus-node-exporter:
+  resources:
+    requests: { cpu: 10m, memory: 24Mi }
