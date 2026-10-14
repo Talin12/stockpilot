@@ -1,0 +1,30 @@
+# Ingress controller: Traefik (traefik/traefik Helm chart).
+# The community ingress-nginx controller was retired by Kubernetes SIG Network in March 2026
+# (no more security fixes). Traefik implements the same standard Ingress API.
+#
+#   helm repo add traefik https://traefik.github.io/charts
+#   helm upgrade --install traefik traefik/traefik -n traefik --create-namespace \
+#     -f k8s/traefik-values.yaml [-f k8s/traefik-values-eks.yaml]
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+  name: traefik
+
+providers:
+  kubernetesIngress:
+    enabled: true
+    publishedService:
+      enabled: true # writes the load balancer address into each Ingress' status
+
+service:
+  type: LoadBalancer # minikube: run `minikube tunnel`; EKS: AWS creates a load balancer
+
+metrics:
+  prometheus:
+    service:
+      enabled: true
+    serviceMonitor:
+      enabled: true # Traefik request metrics in Prometheus too
+
+resources:
+  requests: { cpu: 50m, memory: 64Mi }
