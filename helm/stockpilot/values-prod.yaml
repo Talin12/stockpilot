@@ -1,0 +1,30 @@
+# AWS EKS. The CI deploy job adds:
+#   --set backend.image.tag=<git sha> --set frontend.image.tag=<git sha>
+environment: production
+
+backend:
+  image:
+    tag: ci-sets-this
+  replicaCount: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 60
+
+frontend:
+  image:
+    tag: ci-sets-this
+  replicaCount: 2
+
+postgres:
+  storage:
+    size: 5Gi
+    storageClass: gp3
+
+ingress:
+  enabled: true
+  className: traefik
+  # No host: the app answers on the Traefik load balancer's DNS name.
+  # Set a real domain with --set ingress.host=stockpilot.example.com
+  host: ""

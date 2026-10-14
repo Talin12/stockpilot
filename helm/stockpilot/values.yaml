@@ -1,0 +1,86 @@
+# Default values for the StockPilot chart.
+# Environment overlays: values-dev.yaml (minikube) and values-prod.yaml (EKS).
+
+environment: dev
+
+imagePullSecrets: []
+#  - name: ghcr-pull
+
+backend:
+  image:
+    repository: ghcr.io/talin12/stockpilot-backend
+    # Required. CI sets this to the Git commit SHA so every running Pod traces back to a commit.
+    tag: ""
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  port: 8000
+  seedDemoData: true
+  resources:
+    requests: { cpu: 100m, memory: 160Mi }
+    limits: { cpu: 500m, memory: 384Mi }
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 60
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+frontend:
+  image:
+    repository: ghcr.io/talin12/stockpilot-frontend
+    tag: ""
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  port: 8080
+  resources:
+    requests: { cpu: 25m, memory: 32Mi }
+    limits: { cpu: 200m, memory: 128Mi }
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+# In-cluster PostgreSQL (StatefulSet + PVC). Fine for a demo; production would use
+# a managed database such as Amazon RDS (set postgres.enabled=false and
+# externalDatabase.existingSecret to a Secret holding DATABASE_URL).
+postgres:
+  enabled: true
+  image: postgres:17-alpine
+  database: stockpilot
+  username: stockpilot
+  # Leave empty to generate a random password on first install (kept across upgrades).
+  password: ""
+  storage:
+    size: 5Gi
+    storageClass: "" # "" = cluster default; EKS uses gp3 (see k8s/storageclass-gp3.yaml)
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+externalDatabase:
+  # Name of an existing Secret with a DATABASE_URL key (used when postgres.enabled=false).
+  existingSecret: ""
+
+ingress:
+  enabled: true
+  className: traefik
+  # Empty host = match any hostname (e.g. the AWS load balancer DNS name).
+  host: stockpilot.local
+  annotations: {}
+  tls:
+    enabled: false
+    secretName: ""
+
+monitoring:
+  # Requires the Prometheus Operator CRDs (kube-prometheus-stack). Skipped automatically if absent.
+  serviceMonitor:
+    enabled: true
+    interval: 15s
+    labels:
+      release: kube-prometheus-stack
+  prometheusRules:
+    enabled: true
+  # ConfigMap picked up by the Grafana dashboard sidecar.
+  grafanaDashboard:
+    enabled: true

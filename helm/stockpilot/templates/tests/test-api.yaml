@@ -1,0 +1,30 @@
+# `helm test stockpilot -n stockpilot` runs this Pod: it checks the API is ready and serving data.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "stockpilot.fullname" . }}-test-api
+  labels:
+    {{- include "stockpilot.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  securityContext:
+    {{- include "stockpilot.podSecurityContext" . | nindent 4 }}
+    runAsUser: 65534
+  containers:
+    - name: smoke
+      image: busybox:1.37
+      command:
+        - sh
+        - -c
+        - |
+          set -e
+          base="http://{{ include "stockpilot.backend.fullname" . }}:{{ .Values.backend.port }}"
+          wget -qO- "$base/ready" | grep -q READY
+          wget -qO- "$base/api/stats" | grep -q total_products
+          wget -qO- "http://{{ include "stockpilot.frontend.fullname" . }}/healthz" | grep -q ok
+          echo "StockPilot smoke test passed"
+      securityContext:
+        {{- include "stockpilot.containerSecurityContext" . | nindent 8 }}

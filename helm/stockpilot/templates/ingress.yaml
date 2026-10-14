@@ -1,0 +1,54 @@
+{{- if .Values.ingress.enabled }}
+{{- $backend := include "stockpilot.backend.fullname" . }}
+{{- $frontend := include "stockpilot.frontend.fullname" . }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "stockpilot.fullname" . }}
+  labels:
+    {{- include "stockpilot.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- if and .Values.ingress.tls.enabled .Values.ingress.host }}
+  tls:
+    - hosts: [{{ .Values.ingress.host | quote }}]
+      secretName: {{ .Values.ingress.tls.secretName | default (printf "%s-tls" (include "stockpilot.fullname" .)) }}
+  {{- end }}
+  rules:
+    - {{- with .Values.ingress.host }}
+      host: {{ . | quote }}
+      {{- end }}
+      http:
+        paths:
+          # /api/* -> FastAPI
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $backend }}
+                port: { name: http }
+          # Swagger UI for the live demo
+          - path: /docs
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $backend }}
+                port: { name: http }
+          - path: /openapi.json
+            pathType: Exact
+            backend:
+              service:
+                name: {{ $backend }}
+                port: { name: http }
+          # everything else -> React app
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $frontend }}
+                port: { name: http }
+{{- end }}

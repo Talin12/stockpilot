@@ -1,0 +1,22 @@
+StockPilot {{ .Chart.AppVersion }} deployed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+  backend image : {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}
+  frontend image: {{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}
+
+Check it:
+  kubectl get pods,svc,ingress,hpa -n {{ .Release.Namespace }}
+  helm test {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+{{- if .Values.ingress.enabled }}
+{{- if .Values.ingress.host }}
+
+Open: http://{{ .Values.ingress.host }}/   (API docs: http://{{ .Values.ingress.host }}/docs)
+{{- else }}
+
+Open the Traefik load balancer address:
+  kubectl get svc -n traefik traefik -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+{{- end }}
+{{- else }}
+
+Port-forward the UI:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "stockpilot.frontend.fullname" . }} 3000:80
+{{- end }}

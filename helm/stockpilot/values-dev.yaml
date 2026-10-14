@@ -1,0 +1,27 @@
+# Local Kubernetes (minikube). Images are built into minikube's Docker daemon,
+# so nothing is pulled from a registry:  ./scripts/minikube-up.sh
+environment: minikube
+
+backend:
+  image:
+    repository: stockpilot-backend
+    tag: local
+    pullPolicy: Never
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+
+frontend:
+  image:
+    repository: stockpilot-frontend
+    tag: local
+    pullPolicy: Never
+
+postgres:
+  storage:
+    size: 1Gi
+
+ingress:
+  enabled: true
+  host: stockpilot.local
