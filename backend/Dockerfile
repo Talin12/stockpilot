@@ -6,7 +6,10 @@ ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install -r requirements.txt \
+    # pip is only needed to build the venv. It vendors its own urllib3/msgpack/setuptools
+    # copies, which Trivy flags, so it is removed before the venv is copied to runtime.
+    && pip uninstall -y pip
 
 # ---- runtime stage: no compilers, no pip cache, non-root ----
 FROM python:3.13-slim AS runtime
