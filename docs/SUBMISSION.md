@@ -111,3 +111,22 @@ Legend: ✅ in the repo / verified · 📸 screenshot to attach · 🎤 show liv
 * Repository: `https://github.com/Talin12/stockpilot`
 * Successful pipeline: `https://github.com/Talin12/stockpilot/actions` (pick the latest green run)
 * Packages: `https://github.com/Talin12?tab=packages`
+
+## Verification log (15 Oct 2026)
+
+What was actually run end to end before submission:
+
+| Check | Result |
+|-------|--------|
+| `pytest -v` (Python 3.13 container, same as CI) | 38 passed, 96% coverage |
+| `docker compose up --build` + `scripts/smoke-test.sh` | all checks passed; containers run as uid 10001 / 101 |
+| Trivy v0.75.0, HIGH/CRITICAL, fixable only | backend 4 HIGH → fixed → 0; frontend 0 |
+| GitHub Actions on `main` | green: test → build → Trivy → GHCR push → EKS deploy (OIDC, no stored AWS keys) |
+| minikube: Helm install, Traefik Ingress, `helm test` | all Pods Running under the restricted Pod Security Standard; Ingress routes `/`, `/api`, `/docs` |
+| minikube HPA under 230 req/s | 2 → 4 → 5 replicas, 0 errors in 34,487 requests |
+| Prometheus | `serviceMonitor/stockpilot/stockpilot-backend/0`: 5/5 targets UP; alert rules loaded |
+| Terraform on AWS (ap-south-1) | VPC + 4 subnets + EKS 1.35 + 2 × m7i-flex.large nodes + 6 add-ons |
+| EKS: CI deploy of a UI change | `helm history` shows a new revision; the UI shows the new commit SHA |
+| EKS HPA under load via the NLB | 2 → 3 → 4 replicas, settling at the 60% CPU target |
+| EKS rolling restart under load (after the preStop fix) | 0 errors in 5,481 requests |
+| Troubleshooting lab | all 4 scenarios reproduce the intended failure, and each documented fix resolves it |
