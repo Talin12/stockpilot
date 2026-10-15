@@ -3,5 +3,3 @@ dist
 .git
 .env
 *.log
-Dockerfile
-.dockerignore
