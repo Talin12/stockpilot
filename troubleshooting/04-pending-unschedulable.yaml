@@ -15,10 +15,11 @@ spec:
     metadata:
       labels: { app: lab-pending, lab: troubleshooting }
     spec:
-      securityContext: { runAsNonRoot: true, runAsUser: 101, seccompProfile: { type: RuntimeDefault } }
+      securityContext: { runAsNonRoot: true, runAsUser: 65535, seccompProfile: { type: RuntimeDefault } }
       containers:
-        - name: web
-          image: nginxinc/nginx-unprivileged:1.29-alpine
+        - name: app
+          # Tiny image every node already has (no Docker Hub rate limits); it just sleeps.
+          image: registry.k8s.io/pause:3.10
           resources:
             requests: { cpu: "64", memory: 256Gi }
           securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: ["ALL"] } }
