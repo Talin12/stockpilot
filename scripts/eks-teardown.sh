@@ -30,7 +30,26 @@ if aws eks describe-cluster --region "$REGION" --name "$CLUSTER" >/dev/null 2>&1
   done
 fi
 
-echo "==> terraform destroy"
+VPC_ID="$(terraform -chdir=terraform output -raw vpc_id 2>/dev/null || true)"
+
+# Phase 1: remove the cluster and its nodes first.
+echo "==> terraform destroy (cluster + nodes)"
+terraform -chdir=terraform destroy -auto-approve -input=false -target=module.eks
+
+# The VPC CNI sometimes leaks detached network interfaces ("aws-K8S-i-...") when nodes
+# terminate. They block deletion of the subnets and node security group for a long time,
+# so remove any that are left before tearing down the network.
+if [[ -n "$VPC_ID" ]]; then
+  for eni in $(aws ec2 describe-network-interfaces --region "$REGION" \
+      --filters "Name=vpc-id,Values=${VPC_ID}" "Name=status,Values=available" "Name=description,Values=aws-K8S-*" \
+      --query 'NetworkInterfaces[].NetworkInterfaceId' --output text); do
+    echo "    deleting orphaned ENI ${eni}"
+    aws ec2 delete-network-interface --region "$REGION" --network-interface-id "$eni"
+  done
+fi
+
+# Phase 2: everything else (VPC, NAT gateway, IAM, OIDC provider).
+echo "==> terraform destroy (network + IAM)"
 terraform -chdir=terraform destroy -auto-approve -input=false
 
 echo "==> leftover check (should be empty)"

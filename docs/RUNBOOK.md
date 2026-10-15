@@ -203,8 +203,9 @@ gh variable set DEPLOY_ENABLED --body false
 ```
 
 The script deletes the Kubernetes-created AWS resources first (the Traefik NLB and the PostgreSQL EBS
-volume, which Terraform doesn't track and which would otherwise block VPC deletion), then runs
-`terraform destroy -auto-approve`, and finally checks that nothing was left behind.
+volume, which Terraform doesn't track and which would otherwise block VPC deletion). It destroys the
+cluster, removes any network interfaces the VPC CNI leaked (`aws-K8S-i-…`, which otherwise stall subnet
+deletion for 20+ minutes), destroys the network and IAM, and finally checks that nothing was left behind.
 
 📸 **Screenshot for M7:** the final `Destroy complete! Resources: 60 destroyed.` line.
 
