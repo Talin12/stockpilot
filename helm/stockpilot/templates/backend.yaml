@@ -26,9 +26,6 @@ spec:
       labels:
         {{- include "stockpilot.baseLabels" . | nindent 8 }}
         {{- $selector | nindent 8 }}
-      annotations:
-        # Roll the pods if the DB credentials change.
-        checksum/db: {{ include (print $.Template.BasePath "/postgres.yaml") . | sha256sum }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
