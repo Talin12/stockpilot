@@ -198,7 +198,7 @@ infra-lint ─────┘   terraform validate + helm lint        ┘   dock
 * **VPC** `10.20.0.0/16` across 2 AZs: **2 public subnets** (load balancer, NAT) and 2 private subnets
   (worker nodes), with a single NAT gateway to keep costs down.
 * **EKS 1.35** (in standard support, avoiding the 6× extended-support price) with a managed node group
-  (3 × t3.medium, AL2023, scales 2–5).
+  (2 × m7i-flex.large, AL2023), which works on AWS Free-plan accounts as well as paid ones.
 * Add-ons: VPC CNI, CoreDNS, kube-proxy, **EBS CSI driver** (IAM via EKS Pod Identity, no node-wide
   permissions), **metrics-server** for the HPA, and Pod Identity Agent.
 * An IAM OIDC provider and deploy role for GitHub Actions ([`github-oidc.tf`](terraform/github-oidc.tf)).

@@ -46,9 +46,9 @@ variable "az_count" {
 }
 
 variable "node_instance_types" {
-  description = "Instance types for the managed node group."
+  description = "Instance types for the managed node group. m7i-flex.large (2 vCPU, 8 GiB) is allowed on AWS Free-plan accounts, which reject t3.medium."
   type        = list(string)
-  default     = ["t3.medium"]
+  default     = ["m7i-flex.large"]
 }
 
 variable "node_capacity_type" {
@@ -69,15 +69,15 @@ variable "node_min_size" {
 }
 
 variable "node_desired_size" {
-  description = "Desired worker nodes. 3 x t3.medium leaves room for the app, ingress-nginx and kube-prometheus-stack."
+  description = "Desired worker nodes. 2 x m7i-flex.large fits the app, Traefik and kube-prometheus-stack, and stays within the 5-vCPU quota of new accounts."
   type        = number
-  default     = 3
+  default     = 2
 }
 
 variable "node_max_size" {
-  description = "Maximum worker nodes."
+  description = "Maximum worker nodes (raise it if your account's On-Demand vCPU quota allows)."
   type        = number
-  default     = 5
+  default     = 2
 }
 
 variable "cluster_admin_arns" {

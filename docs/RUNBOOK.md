@@ -45,7 +45,7 @@ Center user rather than the root user, and enable MFA on root.
 
 ```bash
 cd terraform
-cp terraform.tfvars.example terraform.tfvars   # defaults: ap-south-1, EKS 1.35, 3 x t3.medium
+cp terraform.tfvars.example terraform.tfvars   # defaults: ap-south-1, EKS 1.35, 2 x m7i-flex.large
 terraform init
 terraform plan -out tfplan                       # expect: Plan: 60 to add, 0 to change, 0 to destroy
 terraform apply tfplan                           # ~15-20 minutes
@@ -58,16 +58,22 @@ route tables, the EKS 1.35 control plane, a managed node group (AL2023), the add
 kube-proxy, EBS CSI, metrics-server, Pod Identity Agent), IAM roles, and the GitHub OIDC provider and
 deploy role.
 
+> **AWS Free-plan accounts** (created after July 2025) may only launch Free-Tier-eligible instance types
+> and have a 5 vCPU On-Demand quota, which is why the default node group is 2 × `m7i-flex.large`
+> (2 vCPU, 8 GiB each). Usage is deducted from the plan's credits (check them with
+> `aws freetier get-account-plan-state --region us-east-1`). A `t3.medium` node group fails with
+> *"The specified instance type is not eligible for Free Tier"* in the Auto Scaling activity history.
+
 **Approximate cost while running (ap-south-1):**
 
 | Item | ~USD/hour |
 |------|-----------|
 | EKS control plane | 0.10 |
-| 3 × t3.medium on-demand | 0.13 |
+| 2 × m7i-flex.large on-demand | 0.17 |
 | NAT gateway (+ data) | 0.06 |
 | Network Load Balancer | 0.03 |
 | EBS (gp3 5 GiB + node disks) | < 0.01 |
-| **Total** | **≈ 0.32 / hour (≈ $7.70 / day)** |
+| **Total** | **≈ 0.36 / hour (≈ $8.70 / day)** |
 
 📸 **Screenshots for M7:** the `terraform plan` output; AWS Console → VPC → *Your VPCs* (`stockpilot-vpc`)
 and *Subnets*; AWS Console → EKS → *Clusters* → `stockpilot-eks` (Compute tab shows the node group),
