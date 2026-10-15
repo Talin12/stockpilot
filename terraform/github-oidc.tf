@@ -9,6 +9,17 @@ variable "github_repository" {
   default     = "Talin12/stockpilot"
 }
 
+variable "github_oidc_subject_prefixes" {
+  description = <<-EOT
+    Subject-claim prefixes GitHub puts in this repository's OIDC tokens. Read yours with
+      gh api repos/<owner>/<repo>/actions/oidc/customization/sub -q .sub_claim_prefix
+    Newer repositories use immutable IDs (repo:Owner@<owner-id>/repo@<repo-id>), so a deleted and
+    re-created repository with the same name cannot assume the role. Older ones use repo:Owner/repo.
+  EOT
+  type        = list(string)
+  default     = ["repo:Talin12@186754467/stockpilot@1420236630"]
+}
+
 variable "create_github_oidc_provider" {
   description = "Create the account-wide GitHub OIDC provider. Set false if the account already has one."
   type        = bool
@@ -48,12 +59,14 @@ data "aws_iam_policy_document" "github_deploy_assume" {
 
     # A job that uses `environment: production` presents the environment claim instead of the ref.
     condition {
-      test     = "StringLike"
+      test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values = [
-        "repo:${var.github_repository}:ref:refs/heads/main",
-        "repo:${var.github_repository}:environment:production",
-      ]
+      values = flatten([
+        for prefix in var.github_oidc_subject_prefixes : [
+          "${prefix}:ref:refs/heads/main",
+          "${prefix}:environment:production",
+        ]
+      ])
     }
   }
 }

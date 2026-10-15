@@ -165,6 +165,12 @@ gh variable set DEPLOY_ENABLED    --body true
 ```
 
 From now on, every push to `main` runs test → build → Trivy → push → `helm upgrade` with the new SHA.
+
+> **If the deploy job fails with `Not authorized to perform sts:AssumeRoleWithWebIdentity`**, the role's
+> trust policy doesn't match the token's `sub` claim. New repositories get *immutable* subject claims
+> (`repo:Owner@<owner-id>/repo@<repo-id>:…`). Check yours with
+> `gh api repos/<owner>/<repo>/actions/oidc/customization/sub -q .sub_claim_prefix` and set Terraform's
+> `github_oidc_subject_prefixes` to that value.
 To pause deployments (for example after teardown): `gh variable set DEPLOY_ENABLED --body false`.
 
 ## 8. Live demo script (final presentation)
