@@ -31,7 +31,7 @@ export default function Sidebar({ view, onNavigate, stats, info, healthy, open, 
           </div>
           <div>
             <div className="brand-name">StockPilot</div>
-            <div className="brand-sub">Central Warehouse</div>
+            <div className="brand-sub">Central Warehouse · Mumbai</div>
           </div>
         </div>
 
