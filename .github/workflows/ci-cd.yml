@@ -182,13 +182,17 @@ jobs:
           echo "Pushed \`${IMAGE}:${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
 
   # ---------------------------------------------------------------- deploy
-  # Enabled once the EKS cluster exists: set repository variable DEPLOY_ENABLED=true
-  # plus secrets AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY (see docs/RUNBOOK.md).
+  # Enabled once the EKS cluster exists: repository variables DEPLOY_ENABLED=true and
+  # AWS_DEPLOY_ROLE_ARN (terraform output github_actions_role_arn). No AWS secrets are stored:
+  # GitHub's OIDC token is exchanged for 1-hour credentials of that role.
   deploy:
     name: Deploy · EKS (Helm)
     needs: build-scan-push
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # lets the job request the OIDC token
     environment:
       name: production
       url: ${{ vars.APP_URL }}
@@ -200,8 +204,8 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: github-${{ github.run_id }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Configure kubectl for EKS

@@ -13,8 +13,13 @@ module "eks" {
 
   # Whoever runs `terraform apply` becomes cluster admin; extra principals via access entries.
   enable_cluster_creator_admin_permissions = true
+  # The GitHub Actions deploy role (github-oidc.tf) also gets admin so `helm upgrade` can manage
+  # cluster-scoped objects; its trust policy limits it to this repo's main branch.
   access_entries = {
-    for idx, arn in var.cluster_admin_arns : "admin-${idx}" => {
+    for name, arn in merge(
+      { github-deploy = aws_iam_role.github_deploy.arn },
+      { for idx, arn in var.cluster_admin_arns : "admin-${idx}" => arn },
+      ) : name => {
       principal_arn = arn
       policy_associations = {
         admin = {
