@@ -55,6 +55,12 @@ spec:
             httpGet: { path: /healthz, port: http }
             initialDelaySeconds: 10
             periodSeconds: 20
+          # Keep serving for a few seconds after termination starts, while Traefik and kube-proxy
+          # drop this Pod from their endpoint lists, so rolling updates don't cut off requests.
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 5
           resources:
             {{- toYaml .Values.frontend.resources | nindent 12 }}
           securityContext:

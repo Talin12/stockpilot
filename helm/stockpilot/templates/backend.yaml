@@ -75,6 +75,12 @@ spec:
             periodSeconds: 15
             timeoutSeconds: 3
             failureThreshold: 3
+          # Keep serving for a few seconds after termination starts, while Traefik and kube-proxy
+          # drop this Pod from their endpoint lists, so rolling updates don't cut off requests.
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 5
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
           securityContext:
