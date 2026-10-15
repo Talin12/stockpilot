@@ -21,8 +21,12 @@ kubectl config use-context "$PROFILE" >/dev/null
 minikube -p "$PROFILE" addons enable metrics-server
 
 echo "==> building images inside minikube (no registry needed)"
-minikube -p "$PROFILE" image build -t stockpilot-backend:local backend
-minikube -p "$PROFILE" image build -t stockpilot-frontend:local frontend
+for component in backend frontend; do
+  minikube -p "$PROFILE" image build -t "stockpilot-${component}:local" "$component"
+  # `minikube image build` can exit 0 even when the build fails, so verify the result.
+  minikube -p "$PROFILE" image ls | grep -q "stockpilot-${component}:local" \
+    || { echo "ERROR: stockpilot-${component}:local was not built" >&2; exit 1; }
+done
 
 ./scripts/install-addons.sh
 
