@@ -2,7 +2,7 @@
 
 Repository: **https://github.com/Talin12/stockpilot** (public)
 
-Legend: ✅ in the repo / verified · 📸 screenshot to attach · 🎤 show live
+Legend: ✅ in the repo / verified · 📸 screenshot in [`docs/screenshots/`](screenshots) (gallery: [SCREENSHOTS.md](SCREENSHOTS.md)) · 🎤 show live
 
 ## M1 Application: frontend + backend + database (10)
 
@@ -11,14 +11,14 @@ Legend: ✅ in the repo / verified · 📸 screenshot to attach · 🎤 show liv
 | FastAPI starts, `/health` responds | ✅ `backend/app/main.py`; `curl localhost:8000/health` → `{"status":"UP"}` |
 | ≥ 4 REST endpoints (GET/POST/PUT/DELETE) | ✅ 14 endpoints, see the [README API table](../README.md#rest-api) and `/docs` |
 | PostgreSQL table via Alembic | ✅ `backend/alembic/versions/0001_create_products.py`, `0002_create_stock_movements.py` |
-| Frontend renders and calls the API | ✅ `frontend/src/api.js`; 📸 `docs/screenshots/app-dashboard.png` |
-| Responsive, usable UI | ✅ 📸 `app-products.png` (desktop), `app-mobile.png` (phone layout) |
+| Frontend renders and calls the API | ✅ `frontend/src/api.js`; 📸 `m1-app-dashboard.png` |
+| Responsive, usable UI | ✅ 📸 `m1-app-products.png` (desktop), `m1-app-mobile.png` (phone layout) |
 
 ## M2 Testing (10)
 
 | Criterion | Evidence |
 |-----------|----------|
-| pytest runs without errors | ✅ 38 passed; 📸 terminal: `cd backend && pytest -v` |
+| pytest runs without errors | ✅ 38 passed; 📸 `m2-pytest-v.png`, `m5-pipeline-pytest-step.png` |
 | ≥ 5 tests over ≥ 3 endpoints | ✅ 38 tests over all endpoints (`tests/test_*.py`) |
 | Test DB / mock, not production | ✅ `tests/conftest.py`: in-memory SQLite per test, `dependency_overrides[get_db]` |
 | `pytest.ini` / `conftest.py` | ✅ both present |
@@ -28,7 +28,7 @@ Legend: ✅ in the repo / verified · 📸 screenshot to attach · 🎤 show liv
 | Criterion | Evidence |
 |-----------|----------|
 | Public repository | ✅ github.com/Talin12/stockpilot |
-| Meaningful commit messages | ✅ Conventional-commit style (`feat(backend): …`, `fix(docker): …`); 📸 `git log --oneline` (25+ commits) |
+| Meaningful commit messages | ✅ Conventional-commit style (`feat(backend): …`, `fix(docker): …`); 📸 `m3-github-commits.png`, `m3-git-log.png` (30+ commits) |
 | `.gitignore` covers `.env`, `__pycache__`, `node_modules`, `.venv` | ✅ root `.gitignore` |
 
 ## M4 Docker (10)
@@ -38,7 +38,7 @@ Legend: ✅ in the repo / verified · 📸 screenshot to attach · 🎤 show liv
 | `backend/Dockerfile` builds | ✅ multi-stage, venv copied into a slim runtime |
 | `frontend/Dockerfile` multi-stage (Node → Nginx) | ✅ `node:22-alpine` build → `nginx-unprivileged` runtime |
 | Non-root users | ✅ backend uid 10001, frontend uid 101 (`docker compose exec backend id`) |
-| `docker compose up --build` starts all 3 | ✅ health-gated startup; 📸 terminal + browser at http://localhost:3000 |
+| `docker compose up --build` starts all 3 | ✅ health-gated startup; 📸 `m4-docker-compose-up.png`, `m4-browser-localhost-3000.png` |
 
 ## M5 CI/CD (15)
 
@@ -51,7 +51,7 @@ Legend: ✅ in the repo / verified · 📸 screenshot to attach · 🎤 show liv
 | Images built for both | ✅ matrix `[backend, frontend]` |
 | Pushed to GHCR | ✅ `ghcr.io/talin12/stockpilot-backend`, `…-frontend` |
 | SHA tags, not `latest` | ✅ `:${{ github.sha }}`; the chart refuses an empty tag |
-| | 📸 green run URL from the Actions tab · 📸 GHCR package page showing SHA tags |
+| | 📸 `m5-pipeline-green-run.png` · `m5-ghcr-backend-sha-tags.png` · `m5-ghcr-frontend-sha-tags.png` |
 
 ## M6 DevSecOps: Trivy (5)
 
@@ -60,7 +60,7 @@ Legend: ✅ in the repo / verified · 📸 screenshot to attach · 🎤 show liv
 | Trivy on both images | ✅ *Trivy scan* step in the matrix job |
 | Fails on HIGH/CRITICAL | ✅ `severity: HIGH,CRITICAL`, `exit-code: "1"` |
 | Explain a CVE / clean result | ✅ [docs/SECURITY.md](SECURITY.md): 4 HIGH CVEs found in pip's vendored urllib3/msgpack/setuptools, fixed by removing pip from the runtime image |
-| | 📸 Trivy output from the job log or job summary |
+| | 📸 `m6-trivy-backend-pipeline.png` · `m6-trivy-frontend-pipeline.png` |
 
 ## M7 Terraform (15)
 
@@ -68,10 +68,10 @@ Legend: ✅ in the repo / verified · 📸 screenshot to attach · 🎤 show liv
 |-----------|----------|
 | Valid HCL in `terraform/` | ✅ `terraform validate` runs in CI (`infra-lint`) |
 | `terraform init` OK | ✅ |
-| `terraform plan` non-empty | ✅ `Plan: 60 to add`; 📸 |
-| VPC with ≥ 2 public subnets | ✅ `vpc.tf` (2 public + 2 private); 📸 AWS Console → VPC |
-| EKS with a node group | ✅ `eks.tf` (`eks_managed_node_groups.default`); 📸 AWS Console → EKS (ap-south-1) |
-| `terraform destroy` clean | ✅ `scripts/eks-teardown.sh`; 📸 `Destroy complete!` |
+| `terraform plan` non-empty | ✅ `Plan: 60 to add`; 📸 `m7-terraform-plan.png`, `m7-terraform-plan-resources.png` |
+| VPC with ≥ 2 public subnets | ✅ `vpc.tf` (2 public + 2 private); 📸 `m7-aws-vpc.png`, `m7-aws-subnets.png` |
+| EKS with a node group | ✅ `eks.tf` (`eks_managed_node_groups.default`); 📸 `m7-aws-eks-cluster.png`, `m7-aws-eks-nodes.png` |
+| `terraform destroy` clean | ✅ `scripts/eks-teardown.sh`; 📸 `m7-terraform-destroy.png`, `m7-post-destroy-audit.png` |
 | `terraform.tfvars.example`, no credentials | ✅ present; CLI uses `aws login`, CI uses OIDC |
 
 ## M8 Kubernetes + Helm (15)
@@ -84,24 +84,24 @@ Legend: ✅ in the repo / verified · 📸 screenshot to attach · 🎤 show liv
 | ≥ 2 replicas backend + frontend | ✅ 2 each (backend HPA 2–6) |
 | ClusterIP Services | ✅ `stockpilot-backend`, `stockpilot-frontend`, `stockpilot-postgres` |
 | Ingress `/` → frontend, `/api` → backend | ✅ `templates/ingress.yaml` |
-| All pods Running | 📸 `kubectl get pods -n stockpilot` |
-| | 📸 `kubectl get svc -n stockpilot` · `helm list -n stockpilot` · browser via Ingress/LB |
+| All pods Running | 📸 `m8-eks-kubectl-pods-svc-helm.png` |
+| | 📸 svc + `helm list` in `m8-eks-kubectl-pods-svc-helm.png` · `m8-app-on-eks-via-loadbalancer.png` · `m8-eks-hpa-scaling.png` |
 
 ## M9 Observability (10)
 
 | Criterion | Evidence |
 |-----------|----------|
-| `/metrics` Prometheus format | ✅ 📸 `curl …/metrics` |
-| Prometheus scraping the app | ✅ ServiceMonitor; 📸 `docs/screenshots/prometheus-targets.png` (5/5 UP) |
+| `/metrics` Prometheus format | ✅ 📸 `m9-curl-metrics.png`, `m9-curl-metrics-local.png` |
+| Prometheus scraping the app | ✅ ServiceMonitor; 📸 `m9-prometheus-targets.png` (5/5 UP) |
 | Grafana accessible | ✅ kube-prometheus-stack |
-| Live panel (requests / latency / errors) | ✅ 📸 `docs/screenshots/grafana-dashboard.png` |
+| Live panel (requests / latency / errors) | ✅ 📸 `m9-grafana-dashboard.png` |
 
 ## M10 Presentation + documentation (5)
 
 | Criterion | Evidence |
 |-----------|----------|
 | Root README explains the app | ✅ `README.md` |
-| Live demo: commit → pipeline → deployment update | 🎤 [RUNBOOK §8](RUNBOOK.md#8-live-demo-script-final-presentation): the UI shows the running commit SHA, so the update is visible |
+| Live demo: commit → pipeline → deployment update | 📸 `m10-pipeline-helm-deploy.png` · 🎤 [RUNBOOK §8](RUNBOOK.md#8-live-demo-script-final-presentation): the UI shows the running commit SHA, so the update is visible |
 
 ---
 

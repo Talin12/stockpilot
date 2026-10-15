@@ -10,7 +10,7 @@ This repository is my DevOps capstone. It takes the app from a laptop to a monit
 AWS: Git → tests → Docker → security scan → registry → Terraform → EKS → Helm → Ingress → autoscaling →
 Prometheus/Grafana → troubleshooting.
 
-![StockPilot dashboard](docs/screenshots/app-dashboard.png)
+![StockPilot dashboard](docs/screenshots/m1-app-dashboard.png)
 
 ---
 
@@ -256,7 +256,7 @@ open http://stockpilot.local
   request, responses by status, and stock movements per minute.
 * `./scripts/load-test.sh` generates traffic to make the dashboard move and the HPA scale.
 
-![Grafana dashboard](docs/screenshots/grafana-dashboard.png)
+![Grafana dashboard](docs/screenshots/m9-grafana-dashboard.png)
 
 ## Troubleshooting lab
 
@@ -287,4 +287,6 @@ port mismatch), **CrashLoopBackOff** (bad `DATABASE_URL`) and **Pending** (unsch
 ## Rubric mapping
 
 See [docs/SUBMISSION.md](docs/SUBMISSION.md) for every grading criterion, the file or screenshot that
-satisfies it, and how to show it live.
+satisfies it, and how to show it live. All 33 evidence screenshots (app, tests, Docker, pipeline, Trivy,
+Terraform plan/destroy, AWS Console, kubectl/Helm on EKS, HPA, Prometheus, Grafana) are in
+[docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).
